@@ -1,0 +1,5 @@
+.serverless/
+.serverless/requirements
+node_modules/
+venv/
+serverless.yml
