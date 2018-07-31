@@ -3,9 +3,6 @@ from glip.process_commands import handler as process_commands
 from core.rc_client_helper import RCClientHelper
 import json
 import traceback
-import boto3
-
-lex_client = boto3.client('lex-runtime')
 
 def handler(event):
 
@@ -85,20 +82,6 @@ def handler(event):
                 
                 #if notification is not for the message posted by the bot
                 if creator_id != bot_id:
-                    print('lex post text')
-                    lex_response = lex_client.post_text(
-                        botName='GlipBot',
-                        botAlias='$LATEST',
-                        userId=creator_id+group_id,
-                        sessionAttributes={
-                            'creator_id': creator_id,
-                            'group_id': group_id
-                        },
-                        inputText='help me with company info'
-                    )
-                    print('lex response')
-                    print(lex_response)
-
                     print('Received message from user')
                     reply_message = process_commands(creator_id,bot_id,group_id,received_message)
                     rcclient_bot.post_message(bot_id,group_id,reply_message)
