@@ -1,5 +1,6 @@
 from core.rc_client_bot import RCClientBot
 from glip.process_commands import handler as process_commands
+from glip.lex.lex_client_handler import handler as lex_process_message
 from core.rc_client_helper import RCClientHelper
 import json
 import traceback
@@ -68,7 +69,7 @@ def handler(event):
                 #Post welcome message with link to authorize helper
                 group_id = body['id']
                 bot_id = notification['ownerId']
-                reply_message = process_commands(None,bot_id,group_id,'new group')
+                reply_message = lex_process_message(None,bot_id,group_id,None,True)
                 rcclient_bot.post_message(bot_id,group_id,reply_message)
 
             elif body['eventType'] == 'PostAdded' and body['type'] == 'TextMessage':
@@ -83,7 +84,8 @@ def handler(event):
                 #if notification is not for the message posted by the bot
                 if creator_id != bot_id:
                     print('Received message from user')
-                    reply_message = process_commands(creator_id,bot_id,group_id,received_message)
+                    #reply_message = process_commands(creator_id,bot_id,group_id,received_message)
+                    reply_message = lex_process_message(creator_id,bot_id,group_id,received_message)
                     rcclient_bot.post_message(bot_id,group_id,reply_message)
                     #rcclient_bot.post_message_card(group_id,reply_message)
                 else:
