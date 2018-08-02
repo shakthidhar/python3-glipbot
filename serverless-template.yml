@@ -1,0 +1,196 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: aws-python3 # NOTE: update this with your service name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: false
+
+provider:
+  name: aws
+  stage: dev
+  runtime: python3.6
+  profile: serverless-admin
+  region: us-east-1
+  timeout: 15
+  environment:
+    RINGCENTRAL_ENV: https://platform.ringcentral.com
+    BOT_CLIENT_ID: replace-with-bot-client-ID
+    BOT_CLIENT_SECRET: replace-with-bot-client-secret
+    REDIRECT_HOST: replace-with-url-from-aws-gateway-api
+    HELPER_CLIENT_ID: replace-with-helper-client-ID
+    HELPER_CLIENT_SECRET: replace-with-helper-client-secret
+    BOT_DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-botTable
+    HELPER_DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-helperTable
+    HELPER_BOT_ACCOUNT_RELATION: ${self:provider.environment.HELPER_DYNAMODB_TABLE}
+    LEX_BOT_NAME: GlipBot
+
+  # environment:
+  #   RINGCENTRAL_ENV: https://platform.devtest.ringcentral.com
+  #   BOT_CLIENT_ID: yQBDiy_2SKi53pMGdmhBBQ
+  #   BOT_CLIENT_SECRET: YxAiRgNPQiierxFw5PIvPgxBvYcSnkRVe8uxVPMSa4QQ
+  #   REDIRECT_HOST: https://3350em8025.execute-api.us-east-1.amazonaws.com/dev/glip
+  #   HELPER_CLIENT_ID: GYWjEEKESZyIPgGsArmlyw
+  #   HELPER_CLIENT_SECRET: v6Y36hLZQByeRWIdA5xa0AVXNDteXyT3K1K50yiUSM3g
+  #   BOT_DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-bot
+  #   HELPER_DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-helperTable
+
+
+# you can overwrite defaults here
+#  stage: dev
+#  region: us-east-1
+
+# you can add statements to the Lambda function's IAM Role here
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.BOT_DYNAMODB_TABLE}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.HELPER_DYNAMODB_TABLE}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.HELPER_DYNAMODB_TABLE}/index/${self:provider.environment.HELPER_BOT_ACCOUNT_RELATION}"
+    - Effect: Allow
+      Action:
+        - lex:PostText
+      Resource: "arn:aws:lex:${opt:region, self:provider.region}:*:${self:provider.environment.LEX_BOT_NAME}:*"
+
+# you can add packaging information here
+#package:
+#  include:
+#    - include-me.py
+#    - include-me-dir/**
+#  exclude:
+#    - exclude-me.py
+#    - exclude-me-dir/**
+
+functions:
+  index:
+    handler: index.handler
+    events:
+      - http:
+          path: glip/{service}/{request_type}
+          method: post
+          cors: true
+      - http:
+          path: glip/{service}/{request_type}
+          method: get
+          cors: true
+
+#    The following are a few example events you can configure
+#    NOTE: Please make sure to change your handler code to work with those events
+#    Check the event documentation for details
+#    events:
+#      - http:
+#          path: users/create
+#          method: get
+#      - s3: ${env:BUCKET}
+#      - schedule: rate(10 minutes)
+#      - sns: greeter-topic
+#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
+#      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
+#      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
+#      - iot:
+#          sql: "SELECT * FROM 'some_topic'"
+#      - cloudwatchEvent:
+#          event:
+#            source:
+#              - "aws.ec2"
+#            detail-type:
+#              - "EC2 Instance State-change Notification"
+#            detail:
+#              state:
+#                - pending
+#      - cloudwatchLog: '/aws/lambda/hello'
+#      - cognitoUserPool:
+#          pool: MyUserPool
+#          trigger: PreSignUp
+
+#    Define function environment variables here
+#    environment:
+#      variable2: value2
+
+resources:
+  Resources:
+    BotDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.BOT_DYNAMODB_TABLE}
+    
+    HelperDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: owner_id
+            AttributeType: S
+          - AttributeName: bot_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: owner_id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.HELPER_DYNAMODB_TABLE}
+            KeySchema:
+              - AttributeName: bot_id
+                KeyType: HASH
+            Projection:
+              NonKeyAttributes:
+                - bot_id
+              ProjectionType: INCLUDE
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.HELPER_DYNAMODB_TABLE}
