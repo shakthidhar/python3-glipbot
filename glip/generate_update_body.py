@@ -27,18 +27,22 @@ def generate_update_notify_body(notify_on,notification_for, current_settings, en
     if notification_for.lower() == 'voicemail' or notification_for.lower() == 'voicemails':
         if notify_on.lower() == 'email':
             current_settings['voicemails']['notifyByEmail'] = setting
+            current_settings['voicemails']['includeAttachment'] = setting
             return current_settings
         elif notify_on.lower() == 'sms':
             current_settings['voicemails']['notifyBySms'] = setting
+            current_settings['voicemails']['includeAttachment'] = setting
             return current_settings
         else:
             return None
     if notification_for.lower() == 'in-fax':
         if notify_on.lower() == 'email':
             current_settings['inboundFaxes']['notifyByEmail'] = setting
+            current_settings['voicemails']['includeAttachment'] = setting
             return current_settings
         elif notify_on.lower() == 'sms':
             current_settings['inboundFaxes']['notifyBySms'] = setting
+            current_settings['voicemails']['includeAttachment'] = setting
             return current_settings
         else:
             return None
