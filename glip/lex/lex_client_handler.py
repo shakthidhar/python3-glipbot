@@ -69,6 +69,73 @@ def handler(creator_id,bot_id,group_id,message,new_group=False):
                 elif lex_response['intentName'] == 'CompanyGreeting' and lex_response['dialogState'] == 'ReadyForFulfillment':
                     company_details = helper.get('/account/~',None)
                     return rsp_for_company_greeting(company_details)
+                elif lex_response['intentName'] == 'PersonalInfo' and lex_response['dialogState'] == 'ReadyForFulfillment':
+                    extension_details = helper.get('/restapi/v1.0/account/~/extension/~', None)
+                    return rsp_for_personal_info(extension_details)
+                elif lex_response['intentName'] == 'BusinessHours' and lex_response['dialogState'] == 'ElicitSlot':
+                    reply_message = lex_response['message']
+                    reply_message = reply_message.replace('\\n','\n')
+                    return reply_message
+                elif lex_response['intentName'] == 'BusinessHours' and lex_response['dialogState'] == 'ReadyForFulfillment':
+                    if lex_response['slots']['HoursFor'] == 'personal':
+                        user_business_hours = helper.get('/restapi/v1.0/account/~/extension/~/business-hours', None)
+                        return rsp_for_business_hours(user_business_hours)
+                    elif lex_response['slots']['HoursFor'] == 'company':
+                        company_business_hours = helper.get('/restapi/v1.0/account/~/business-hours', None)
+                        return rsp_for_business_hours(company_business_hours)
+                elif lex_response['intentName'] == 'GetServices' and lex_response['dialogState'] == 'ElicitSlot':
+                    reply_message = lex_response['message']
+                    reply_message = reply_message.replace('\\n','\n')
+                    return reply_message
+                elif lex_response['intentName'] == 'GetServices' and lex_response['dialogState'] == 'ReadyForFulfillment':
+                    extension_details = helper.get('/restapi/v1.0/account/~/extension/~', None)
+                    reply_message = rsp_for_user_services(extension_details,lex_response['slots']['ServiceType'])
+                    return reply_message
+                elif lex_response['intentName'] == 'CallerID' and lex_response['dialogState'] == 'ReadyForFulfillment':
+                    caller_id_details = helper.get('/restapi/v1.0/account/~/extension/~/caller-id', None)
+                    reply_message = rsp_for_caller_id(caller_id_details)
+                    return reply_message
+                elif lex_response['intentName'] == 'EditPersonalInfo' and lex_response['dialogState'] == 'ReadyForFulfillment':
+                    reply_message = rsp_for_edit_personal_info()
+                    return reply_message
+                elif lex_response['intentName'] == 'PresenceInfo' and lex_response['dialogState'] == 'ReadyForFulfillment':
+                    query_params = {
+                        'detailedTelephonyState': True,
+                        'sipData': False
+                    }
+                    presence_info = helper.get('/restapi/v1.0/account/~/extension/~/presence',query_params)
+                    reply_message = rsp_for_user_presence(presence_info)
+                    return reply_message
+                elif lex_response['intentName'] == 'EditCallerID' and lex_response['dialogState'] == 'ReadyForFulfillment':
+                    reply_message = rsp_for_edit_callerID_settings()
+                    return reply_message
+                elif lex_response['intentName'] == 'EditBusinessHours' and lex_response['dialogState'] == 'ReadyForFulfillment':
+                    reply_message = rsp_for_edit_user_hours()
+                    return reply_message
+                elif lex_response['intentName'] == 'EditUserStatus' and lex_response['dialogState'] == 'ReadyForFulfillment':
+                    update_user_status = generate_update_user_status_body(lex_response['slots']['UserStatus'])
+                    helper.put('/restapi/v1.0/account/~/extension/~/presence',update_user_status)
+                    return 'Successfully changed your user status to: **'+lex_response['slots']['UserStatus']+'**'
+                elif lex_response['intentName'] == 'EditUserStatus' and lex_response['dialogState'] == 'ElicitSlot':
+                    reply_message = lex_response['message']
+                    reply_message = reply_message.replace('\\n','\n')
+                    return reply_message
+                elif lex_response['intentName'] == 'EditDnDStatus' and lex_response['dialogState'] == 'ReadyForFulfillment':
+                    update_dnd = generate_update_dnd_body(lex_response['slots']['DnDStatus'])
+                    helper.put('/restapi/v1.0/account/~/extension/~/presence',update_dnd)
+                    return 'Successfully changed your Do Not Disturb status to: **'+lex_response['slots']['DnDStatus']+'**'
+                elif lex_response['intentName'] == 'EditDnDStatus' and lex_response['dialogState'] == 'ElicitSlot':
+                    reply_message = lex_response['message']
+                    reply_message = reply_message.replace('\\n','\n')
+                    return reply_message
+                elif lex_response['intentName'] == 'NotificationSettings' and lex_response['dialogState'] == 'ReadyForFulfillment':
+                    nofity_details = helper.get('/account/~/extension/~/notification-settings', None)
+                    return rsp_for_get_notify(nofity_details,lex_response['slots']['AlertsFor'])
+                elif lex_response['intentName'] == 'NotificationSettings' and lex_response['dialogState'] == 'ElicitSlot':
+                    reply_message = lex_response['message']
+                    reply_message = reply_message.replace('\\n','\n')
+                    return reply_message                    
+
             else:
                 reply_message = get_auth_url_msg(creator_id,bot_id,group_id)
                 return reply_message
@@ -76,6 +143,7 @@ def handler(creator_id,bot_id,group_id,message,new_group=False):
         except Exception as error:
             logging.error(error)
             traceback.print_exc()
+            return 'An error as occured while processing your request'
             #post message an error has occured while processing your request
 
     #if 'new group' have been created display welcome message 

@@ -120,7 +120,6 @@ def response_for_edit_user_hours():
     ret_val = '[Click here]'+'('+service_web_settings_url+'settings/extensionInfo/settingsAndPermissions' +') to edit your bussiness hours.'
     return ret_val
 
-
 def response_for_edit_personal_info():
     ret_val = '[Click here]'+'('+service_web_settings_url+'settings/extensionInfo/general' +') to edit your personal information.'
     return ret_val
