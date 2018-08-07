@@ -23,6 +23,20 @@ For the GlipHelper application, set the Platform Type to Server/Web and provide 
 ### Update Serverless-template.yml file ###
 Populate the environment variables in the serverless-template.yml file and rename it serverless.yml
 
+```
+environment:
+    RINGCENTRAL_ENV: https://platform.ringcentral.com
+    BOT_CLIENT_ID: replace-with-bot-client-ID
+    BOT_CLIENT_SECRET: replace-with-bot-client-secret
+    REDIRECT_HOST: replace-with-url-from-aws-gateway-api
+    HELPER_CLIENT_ID: replace-with-helper-client-ID
+    HELPER_CLIENT_SECRET: replace-with-helper-client-secret
+    BOT_DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-botTable
+    HELPER_DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-helperTable
+    HELPER_BOT_ACCOUNT_RELATION: ${self:provider.environment.HELPER_DYNAMODB_TABLE}
+    LEX_BOT_NAME: GlipBot
+```
+
 
 ### Install Serverless ###
 Install serverless globally on you computer by using the command:
