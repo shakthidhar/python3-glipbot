@@ -37,6 +37,8 @@ environment:
     LEX_BOT_NAME: GlipBot
 ```
 
+### Import Amazon Lex Bot ###
+needs to be updated
 
 ### Install Serverless ###
 Install serverless globally on you computer by using the command:
