@@ -19,11 +19,11 @@ def get_auth_url_msg(owner_id,bot_id,group_id):
 
 def handler(creator_id,bot_id,group_id,message,new_group=False):
 
-    logging.info('received the message: '+ message)
     if new_group:
         #display welcome message
-        return resopnse_for_new_group()
+        return response_for_new_group(bot_id)
     else:
+        logging.info('received the message: '+ message)
         try:
             #Send command to lex and identify intent
             print(creator_id+group_id)
@@ -43,8 +43,11 @@ def handler(creator_id,bot_id,group_id,message,new_group=False):
             
             if lex_response['dialogState'] == 'ElicitIntent':
                 return lex_response['message']
-            if lex_response['dialogState'] == 'Failed':
+            elif lex_response['dialogState'] == 'Failed':
                 return lex_response['message']
+            elif lex_response['intentName'] == 'Hello' and lex_response['dialogState'] == 'ReadyForFulfillment':
+                reply_message = response_for_new_group(bot_id)
+                return reply_message
             elif lex_response['intentName'] == 'Help' and lex_response['dialogState'] == 'ReadyForFulfillment':
                 #get 'FeatureGroup' slot from lex and post message
                 return response_for_help(lex_response['slots']['FeatureGroup'])
@@ -140,11 +143,11 @@ def handler(creator_id,bot_id,group_id,message,new_group=False):
                     if lex_response['slots']['Action'] == 'enable':
                         updated_settings = generate_update_notify_body(lex_response['slots']['AlertType'],lex_response['slots']['AlertsFor'],current_settings,True)
                         helper.put('/account/~/extension/~/notification-settings',updated_settings)
-                        return 'Successful!! you will receive **'+ lex_response['slots']['AlertType'] +'** notifications for **'+ lex_response['slots']['AlertsFor'] +'**.'
+                        return 'Successful!! You will receive **'+ lex_response['slots']['AlertType'] +'** notifications for **'+ lex_response['slots']['AlertsFor'] +'**.'
                     elif lex_response['slots']['Action'] == 'disable':
                         updated_settings = generate_update_notify_body(lex_response['slots']['AlertType'],lex_response['slots']['AlertsFor'],current_settings,False)
                         helper.put('/account/~/extension/~/notification-settings',updated_settings)
-                        return 'Successful!! you will **NOT** receive **'+ lex_response['slots']['AlertType'] +'** notifications for **'+ lex_response['slots']['AlertsFor'] +'**.'
+                        return 'Successful!! You will **NOT** receive **'+ lex_response['slots']['AlertType'] +'** notifications for **'+ lex_response['slots']['AlertsFor'] +'**.'
                 elif lex_response['intentName'] == 'EditNotificationSettings' and lex_response['dialogState'] == 'ElicitSlot':
                     reply_message = lex_response['message']
                     reply_message = reply_message.replace('\\n','\n')

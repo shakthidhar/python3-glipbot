@@ -62,6 +62,7 @@ def handler(event):
             print('Received an event notification')
             notification = json.loads(event['body'])
             body = notification['body']
+            print(notification)
             print(body)
 
             if body['eventType'] == 'GroupJoined':

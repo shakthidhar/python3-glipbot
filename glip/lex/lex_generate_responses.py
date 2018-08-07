@@ -6,15 +6,15 @@ grp_callerID_info = 'caller ID info'
 
 service_web_settings_url = 'https://service.ringcentral.com/application/settings/'
 
-def resopnse_for_new_group(bot_id):
-    ret_val = 'Hello!! I am [:Person]('+bot_id+')!! I can help you with the following:'
+def response_for_new_group(bot_id):
+    ret_val = 'Hello!! I am ![:Person]('+bot_id+')!! I can help you with the following:\n'
     ret_val = ret_val+'* **View your company information** like billing plan, service plane, business hours etc.\n'
     ret_val = ret_val+'* **View/edit your personal information** like personal information, business hours, services available etc.\n'
     ret_val = ret_val+'* **View/edit your notification settings** for Voicemails, Texts and Fax\n'
-    ret_val = ret_val+'* **View/edit your presence information** (Do Not Disturb, User Status etc.)\n'
+    ret_val = ret_val+'* **View your presence information and Edit Do Not Disturb and User Status**\n'
     ret_val = ret_val+'* **View/edit your caller ID settings** for available features\n'
-    ret_val = ret_val+ 'If you would like see more detailed information about any of the functions above please type \'I need help with [function name]\''
-    ret_val = re_val+ 'for example if you need more details about company informations you can type \'I need more help with company information\'\nFinally,'
+    ret_val = ret_val+ 'If you would like see more detailed information about any of the functions above, please ask.'
+    #ret_val = ret_val+ 'for example if you need more details about company informations you can type \'I need more help with company information\'\n'
     return ret_val
 
 def response_for_help(function_group):
@@ -36,7 +36,7 @@ def response_for_help(function_group):
         ret_val = ret_val + '* **Services available to you** - lists all the RingCentral services that available for you to use\n'
         ret_val = ret_val + '* **Services unavailable to me** - lists all the RingCentral services that are not available for you\n'
         ret_val = ret_val + '* **Edit your personal information** - you can edit your First and Last Name, Business Phone, Business Hourss and Address\n'
-        ret_val = ret_val + '* **Edit personal greetings**\n'
+        #ret_val = ret_val + '* **Edit personal greetings**\n'
         ret_val = ret_val + 'You always ask for help to view all the other available functions'
         return ret_val
     elif function_group == grp_notification_settings:
