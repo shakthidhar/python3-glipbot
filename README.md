@@ -1,1 +1,41 @@
 # python3-glipbot
+
+### Create RingCentral Apps ###
+In order to build a bot that has the ability to change your ringcentral setting you are required to have two ringcentral apps:
+* GlipBot
+* GlipHelper
+
+GlipBot is used to subscribe for glip events and posts. So that whenever a message is posted on Glip you receive a POST notification. The bot will also receive notifications Glip groups and bot create and remove events.
+```
+#Get Glip Post Events
+"/restapi/v1.0/glip/posts"
+#Get Glip Group Events
+"/restapi/v1.0/glip/groups"
+#Get Bot Create/Remove events
+"/restapi/v1.0/account/~/extension/~"
+```
+Create the GlipBot application using your ringcentral developer account. Set the server type to Server/Bot and give it give it the following permissions: Glip, Read Accounts, Webhook Subscription
+
+
+### Install Serverless ###
+Install serverless globally on you computer by using the command:
+```
+npm install -g serverless
+```
+### Create Virtual Environment ###
+Change into your project directory and create a virtual environment
+```
+virtualenv venv --python=python3
+```
+Install Ringcentral SDK into your virtual environment
+```
+pip install ringcentral
+```
+Save package versions of your environment into requirements.txt file
+```
+pip freeze > requirements.txt
+```
+### Deploy the lambda function ###
+```
+serverless deploy
+```
