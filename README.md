@@ -5,7 +5,7 @@ In order to build a bot that has the ability to change your ringcentral setting 
 * GlipBot
 * GlipHelper
 
-GlipBot is used to subscribe for glip events and posts. So that whenever a message is posted on Glip you receive a POST notification. The bot will also receive notifications Glip groups and bot create and remove events.
+GlipBot is used to subscribe for glip events and posts. So that whenever a message is posted on Glip you receive a POST notification. The bot will also receive notifications Glip groups and bot create/remove events.
 ```
 #Get Glip Post Events
 "/restapi/v1.0/glip/posts"
@@ -14,7 +14,14 @@ GlipBot is used to subscribe for glip events and posts. So that whenever a messa
 #Get Bot Create/Remove events
 "/restapi/v1.0/account/~/extension/~"
 ```
-Create the GlipBot application using your ringcentral developer account. Set the server type to Server/Bot and give it give it the following permissions: Glip, Read Accounts, Webhook Subscription
+Create the GlipBot application using your ringcentral developer account. Set Platform Type to Server/Bot and give it give it the following permissions: Glip, Read Accounts, Webhook Subscription.
+
+Since GlipBot is of the type 'Server/Bot' its extension does not have the permissions to necessary to read and edit users' ringcentral settings. Therefore, we create another application, GlipHelper, to handle this.
+
+For the GlipHelper application, set the Platform Type to Server/Web and provide it with the following permissions: Edit Extensions, Edit Messages, Edit Presence, Read Accounts, Read Contacts and Read Messages.
+
+### Update Serverless-template.yml file ###
+Populate the environment variables in the serverless-template.yml file and rename it serverless.yml
 
 
 ### Install Serverless ###
