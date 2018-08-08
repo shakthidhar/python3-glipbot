@@ -66,31 +66,47 @@ def handler(event):
             print(body)
 
             if body['eventType'] == 'GroupJoined':
-                #New user has joined the group
+                #New Group or Private chat has bee created
+                #Create an entry in the database 
+                #Store groupId and number of participants in the group
                 #Post welcome message with link to authorize helper
                 group_id = body['id']
                 bot_id = notification['ownerId']
                 reply_message = lex_process_message(None,bot_id,group_id,None,True)
                 rcclient_bot.post_message(bot_id,group_id,reply_message)
+            
+            elif body['eventType'] == 'GroupChanged':
+                #update db with number of people in the table
+                pass
+            
+            elif body['eventType'] == 'GroupLeft':
+                #bot has been romeved from the group so delete entry from the database
+                pass
 
             elif body['eventType'] == 'PostAdded' and body['type'] == 'TextMessage':
-                #Received a new text message
-                #Check the text with existing commands and post 
-                #and an appropriate message
-                group_id = body['groupId']
-                creator_id = body['creatorId']
-                bot_id = notification['ownerId']
-                received_message = body['text']
-                
-                #if notification is not for the message posted by the bot
-                if creator_id != bot_id:
-                    print('Received message from user')
-                    #reply_message = process_commands(creator_id,bot_id,group_id,received_message)
-                    reply_message = lex_process_message(creator_id,bot_id,group_id,received_message)
-                    rcclient_bot.post_message(bot_id,group_id,reply_message)
-                    #rcclient_bot.post_message_card(group_id,reply_message)
+
+                if body['text'] == '':
+                    #Group has been deleted.
+                    #Delete group from db
+                    pass
                 else:
-                    print('The bot posted: '+ received_message)
+                    #Received a new text message
+                    #Check the text with existing commands and post 
+                    #and an appropriate message
+                    group_id = body['groupId']
+                    creator_id = body['creatorId']
+                    bot_id = notification['ownerId']
+                    received_message = body['text']
+                    
+                    #if notification is not for the message posted by the bot
+                    if creator_id != bot_id:
+                        print('Received message from user')
+                        #reply_message = process_commands(creator_id,bot_id,group_id,received_message)
+                        reply_message = lex_process_message(creator_id,bot_id,group_id,received_message)
+                        rcclient_bot.post_message(bot_id,group_id,reply_message)
+                        #rcclient_bot.post_message_card(group_id,reply_message)
+                    else:
+                        print('The bot posted: '+ received_message)
             #if event.type = 'create' do nothing
             elif body['eventType'] == 'Create':
                 print('A new bot with account ID '+notification['ownerId']+' and extension ID '+ body['extensionId']+' has been created')

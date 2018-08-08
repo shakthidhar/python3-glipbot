@@ -11,8 +11,8 @@ lex_client = boto3.client('lex-runtime')
 help_intent = 'Help'
 helper = RCClientHelper()
 
-def get_auth_url_msg(owner_id,bot_id,group_id):
-    helper.save_bot_and_group_id(owner_id, bot_id, group_id)
+def get_auth_url_msg(owner_id,bot_id):
+    helper.save_bot_and_group_id(owner_id, bot_id)
     auth_url = helper.get_auth_url()
     message = 'Glip Bot **needs your authorization** before it can process your requests. **[Click here]('+auth_url+')** to authorize the bot.\n'
     return message
@@ -154,7 +154,7 @@ def handler(creator_id,bot_id,group_id,message,new_group=False):
                     return reply_message                       
 
             else:
-                reply_message = get_auth_url_msg(creator_id,bot_id,group_id)
+                reply_message = get_auth_url_msg(creator_id,bot_id)
                 return reply_message
 
         except Exception as error:

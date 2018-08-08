@@ -77,11 +77,10 @@ class RCClientHelper:
             )
             
     
-    def save_bot_and_group_id(self, owner_id, bot_id, group_id):
+    def save_bot_and_group_id(self, owner_id, bot_id):
         data = {
             'owner_id':owner_id,
-            'bot_id':bot_id,
-            'group_id':group_id
+            'bot_id':bot_id
         }
         table = dynamodb.Table(os.environ['HELPER_DYNAMODB_TABLE'])
         table.put_item(Item=data)
