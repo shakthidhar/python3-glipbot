@@ -139,7 +139,14 @@ def handler(event):
                 total_members = len(body['members'])
                 save_group_id(group_id,total_members, bot_id)
                 if total_members == 2:
-                    reply_message = lex_process_message(None,bot_id,group_id,None,True)
+                    
+                    creator_id = ''
+                    for member in body['members']:
+                        if member != str(bot_id):
+                            creator_id = member
+                            break
+                    
+                    reply_message = lex_process_message(creator_id,bot_id,group_id,None,True)
                     rcclient_bot.post_message(bot_id,group_id,reply_message)
             
             elif body['eventType'] == 'GroupChanged':

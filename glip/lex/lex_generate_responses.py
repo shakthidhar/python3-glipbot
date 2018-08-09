@@ -6,8 +6,8 @@ grp_callerID_info = 'caller ID info'
 
 service_web_settings_url = 'https://service.ringcentral.com/application/settings/'
 
-def response_for_new_group(bot_id):
-    ret_val = 'Hello!! I am ![:Person]('+bot_id+')!! I can help you with the following:\n'
+def response_for_new_group(creator_id, bot_id):
+    ret_val = 'Hello ![:Person]('+ creator_id +')!! I am ![:Person]('+bot_id+')!! I can help you with the following:\n'
     ret_val = ret_val+'* **View your company information** like billing plan, service plane, business hours etc.\n'
     ret_val = ret_val+'* **View/edit your personal information** like personal information, business hours, services available etc.\n'
     ret_val = ret_val+'* **View/edit your notification settings** for Voicemails, Texts and Fax\n'

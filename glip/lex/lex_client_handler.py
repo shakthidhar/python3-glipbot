@@ -21,7 +21,7 @@ def handler(creator_id,bot_id,group_id,message,new_group=False):
 
     if new_group:
         #display welcome message
-        return response_for_new_group(bot_id)
+        return response_for_new_group(creator_id, bot_id)
     else:
         logging.info('received the message: '+ message)
         try:
@@ -46,7 +46,7 @@ def handler(creator_id,bot_id,group_id,message,new_group=False):
             elif lex_response['dialogState'] == 'Failed':
                 return lex_response['message']
             elif lex_response['intentName'] == 'Hello' and lex_response['dialogState'] == 'ReadyForFulfillment':
-                reply_message = response_for_new_group(bot_id)
+                reply_message = response_for_new_group(creator_id,bot_id)
                 return reply_message
             elif lex_response['intentName'] == 'Help' and lex_response['dialogState'] == 'ReadyForFulfillment':
                 #get 'FeatureGroup' slot from lex and post message
