@@ -112,7 +112,16 @@ class RCClientBot:
             header = {
                 'Authorization': 'bearer ' + data['access_token']
             }
-            self.platform.post('/subscription',body=requestData, headers=header, skip_auth_check=True)
+            try:
+                self.platform.post('/subscription',body=requestData, headers=header, skip_auth_check=True)
+            except Exception as error:
+                logging.error(error)
+                delete_token(self,bot_id)
+                response = {
+                    "statusCode": 500,
+                    "body": "could not add token to db"
+                }
+                return response
             
             response = {
                 "statusCode": 200,
