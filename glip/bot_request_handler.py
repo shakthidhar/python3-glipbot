@@ -189,7 +189,7 @@ def handler(event):
                     elif creator_id != bot_id and total_members > 2:
                         matches = re.findall(re_mention, received_message)
                         if str(bot_id) in matches:
-                            reply_message = 'Sorry, the bot is not meant to be used in teams with more than two members(including the bot).'
+                            reply_message = 'Sorry, ![:Person]('+ bot_id +') is not meant to be used in teams with more than two members(including the bot).'
                             rcclient_bot.post_message(bot_id,group_id,reply_message)
                             print('Bot was mentioned in a group'+ received_message)
             #if event.type = 'create' do nothing
