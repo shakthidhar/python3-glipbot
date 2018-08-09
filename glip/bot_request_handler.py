@@ -4,6 +4,70 @@ from glip.lex.lex_client_handler import handler as lex_process_message
 from core.rc_client_helper import RCClientHelper
 import json
 import traceback
+import boto3
+import os
+import re
+
+dynamodb = boto3.resource('dynamodb')
+re_mention = r'!\[:Person\]\(([0-9]+)\)'
+
+def save_group_id(group_id, total_members, bot_id):
+    table = dynamodb.Table(os.environ['GROUP_LIST_DYNAMODB_TABLE'])
+    group_info = {
+        'group_id':group_id,
+        'bot_id':bot_id,
+        'total_members':total_members
+    }
+    table.put_item(Item=group_info)
+    print('A record for the group has been created.')
+
+def get_total_members(group_id, bot_id):
+    table = dynamodb.Table(os.environ['GROUP_LIST_DYNAMODB_TABLE'])
+    response = table.get_item(
+        Key={
+            'group_id': group_id,
+            'bot_id': bot_id
+        }
+    )
+    return response['Item']['total_members']
+
+def update_group_id(group_id, total_members, bot_id):
+    table = dynamodb.Table(os.environ['GROUP_LIST_DYNAMODB_TABLE'])
+    response = table.update_item(
+        Key = {
+            'group_id':group_id,
+            'bot_id': bot_id
+        },
+        UpdateExpression="set total_members = :tm",
+        ExpressionAttributeValues={
+            ':tm': total_members,
+        },
+        ReturnValues="ALL_NEW"
+    )
+    print('The number of members for the group '+group_id+' has been updated to '+str(response['Attributes']['total_members']))
+
+def delete_group_id_by_bot_id(bot_id):
+    table = dynamodb.Table(os.environ['GROUP_LIST_DYNAMODB_TABLE'])
+    response = table.query(
+        KeyConditionExpression=Key('bot_id').eq(bot_id)
+    )
+    
+    for item in response['Items']:
+        table.delete_item(
+            Key={
+                'group_id': item['group_id']
+            }
+        )
+
+def delete_group_id_by_group_id(group_id, bot_id):
+    table = dynamodb.Table(os.environ['GROUP_LIST_DYNAMODB_TABLE'])
+    table.delete_item(
+        Key={
+            'group_id': group_id,
+            'bot_id': bot_id,
+        }
+    )
+
 
 def handler(event):
 
@@ -72,41 +136,55 @@ def handler(event):
                 #Post welcome message with link to authorize helper
                 group_id = body['id']
                 bot_id = notification['ownerId']
-                reply_message = lex_process_message(None,bot_id,group_id,None,True)
-                rcclient_bot.post_message(bot_id,group_id,reply_message)
+                total_members = len(body['members'])
+                save_group_id(group_id,total_members, bot_id)
+                if total_members == 2:
+                    reply_message = lex_process_message(None,bot_id,group_id,None,True)
+                    rcclient_bot.post_message(bot_id,group_id,reply_message)
             
             elif body['eventType'] == 'GroupChanged':
                 #update db with number of people in the table
-                pass
+                group_id = body['id']
+                bot_id = notification['ownerId']
+                total_members = len(body['members'])
+                update_group_id(group_id,total_members, bot_id)
             
             elif body['eventType'] == 'GroupLeft':
                 #bot has been romeved from the group so delete entry from the database
-                pass
+                group_id = body['id']
+                bot_id = notification['ownerId']
+                delete_group_id_by_group_id(group_id, bot_id)
 
             elif body['eventType'] == 'PostAdded' and body['type'] == 'TextMessage':
 
-                if body['text'] == '':
+                #Received a new text message
+                group_id = body['groupId']
+                creator_id = body['creatorId']
+                bot_id = notification['ownerId']
+                received_message = body['text']
+
+                if received_message == '':
                     #Group has been deleted.
                     #Delete group from db
-                    pass
-                else:
-                    #Received a new text message
-                    #Check the text with existing commands and post 
-                    #and an appropriate message
                     group_id = body['groupId']
-                    creator_id = body['creatorId']
-                    bot_id = notification['ownerId']
-                    received_message = body['text']
-                    
+                    delete_group_id_by_group_id(group_id,bot_id)
+                else:
+                    total_members = get_total_members(group_id, bot_id)
+                    #Check the text with existing intents and post 
+                    #and an appropriate message
                     #if notification is not for the message posted by the bot
-                    if creator_id != bot_id:
+                    if creator_id != bot_id and total_members == 2:
                         print('Received message from user')
                         #reply_message = process_commands(creator_id,bot_id,group_id,received_message)
                         reply_message = lex_process_message(creator_id,bot_id,group_id,received_message)
                         rcclient_bot.post_message(bot_id,group_id,reply_message)
                         #rcclient_bot.post_message_card(group_id,reply_message)
-                    else:
-                        print('The bot posted: '+ received_message)
+                    elif creator_id != bot_id and total_members > 2:
+                        matches = re.findall(re_mention, received_message)
+                        if str(bot_id) in matches:
+                            reply_message = 'Sorry, the bot is not meant to be used in teams with more than two members(including the bot).'
+                            rcclient_bot.post_message(bot_id,group_id,reply_message)
+                            print('Bot was mentioned in a group'+ received_message)
             #if event.type = 'create' do nothing
             elif body['eventType'] == 'Create':
                 print('A new bot with account ID '+notification['ownerId']+' and extension ID '+ body['extensionId']+' has been created')
@@ -116,6 +194,7 @@ def handler(event):
                 extension_id = body['extensionId']
                 rcclient_bot.delete_token(bot_id)
                 rcclient_helper.delete_token(bot_id)
+                delete_group_id_by_bot_id(bot_id)
                 print('The bot with account ID '+bot_id+ ' and extension ID '+extension_id+' has been removed')
 
             response = {
