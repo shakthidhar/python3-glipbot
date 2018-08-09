@@ -122,7 +122,7 @@ def rsp_for_personal_info(extension_details):
     if 'company' in extension_details['contact']:
         ret_val = ret_val + '**Company**: {company}'.format(company = extension_details['contact']['company'])
     if 'businessPhone' in extension_details['contact']:
-        ret_val = ret_val + '**Bussiness Phone**: {business_phone}\n'.format(business_phone = extension_details['contact']['businessPhone'])
+        ret_val = ret_val + '**Business Phone**: {business_phone}\n'.format(business_phone = extension_details['contact']['businessPhone'])
     if 'extensionNumber' in extension_details:
         ret_val = ret_val + '**Extension Number**: {extension_number}\n'.format(extension_number = extension_details['extensionNumber'])
     if 'businessAddress' in extension_details['contact']:
