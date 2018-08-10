@@ -11,18 +11,18 @@ lex_client = boto3.client('lex-runtime')
 help_intent = 'Help'
 helper = RCClientHelper()
 
-def get_auth_url_msg(owner_id,bot_id):
-    helper.save_bot_and_group_id(owner_id, bot_id)
+def get_auth_url_msg(bot_id):
     auth_url = helper.get_auth_url()
     message = '![:Person]('+bot_id+') **needs your authorization** before it can process your requests. **[Click here]('+auth_url+')** to authorize the bot.\n'
     return message
 
-def get_welcome_message(creator_id,bot_id):
+def get_welcome_message(creator_id,bot_id,group_id):
     if helper.has_valid_token(creator_id):
         response = response_for_new_group(creator_id, bot_id)
         #print('Welcome message '+response)
         return response_for_new_group(creator_id, bot_id)
     else:
+        helper.save_bot_and_group_id(creator_id, bot_id,group_id)
         auth_url = helper.get_auth_url()
         return response_for_new_group(creator_id, bot_id, auth_url, False)
 
@@ -31,7 +31,7 @@ def handler(creator_id,bot_id,group_id,message,new_group=False):
 
     if new_group:
         #display welcome message
-        return get_welcome_message(creator_id,bot_id)
+        return get_welcome_message(creator_id,bot_id,group_id)
     else:
         logging.info('received the message: '+ message)
         try:
@@ -56,7 +56,7 @@ def handler(creator_id,bot_id,group_id,message,new_group=False):
             elif lex_response['dialogState'] == 'Failed':
                 return lex_response['message']
             elif lex_response['intentName'] == 'Hello' and lex_response['dialogState'] == 'ReadyForFulfillment':
-                return get_welcome_message(creator_id,bot_id)
+                return get_welcome_message(creator_id,bot_id,group_id)
             elif lex_response['intentName'] == 'Help' and lex_response['dialogState'] == 'ReadyForFulfillment':
                 #get 'FeatureGroup' slot from lex and post message
                 return response_for_help(lex_response['slots']['FeatureGroup'])
@@ -163,7 +163,7 @@ def handler(creator_id,bot_id,group_id,message,new_group=False):
                     return reply_message                       
 
             else:
-                reply_message = get_auth_url_msg(creator_id,bot_id)
+                reply_message = get_auth_url_msg(bot_id)
                 return reply_message
 
         except Exception as error:

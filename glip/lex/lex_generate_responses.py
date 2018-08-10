@@ -16,7 +16,7 @@ def response_for_new_group(creator_id, bot_id, auth_url=None, authorized=True):
     ret_val = ret_val+ 'If you would like see more detailed information about any of the functions above, please ask.'
     #ret_val = ret_val+ 'for example if you need more details about company informations you can type \'I need more help with company information\'\n'
     if not authorized:
-        ret_val = ret_val+ 'Before you get started please authorize the ![:Person]('+bot_id+') by '+ '**[clicking here]('+auth_url+')**.'
+        ret_val = ret_val+ '\nBefore you get started please authorize the ![:Person]('+bot_id+') by '+ '**[clicking here]('+auth_url+')**.'
 
     return ret_val
 

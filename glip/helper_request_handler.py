@@ -100,7 +100,7 @@ def get_success_page():
             <div class="container">
                 <div class="container row align-items-center justify-content-md-center" style="width:100%; height:100%">
                     <div class="col col-md-auto justify-content-center">
-                        <h3 style="text-align:center">Authorization Successful!! Please return to your GlipBot</h3>
+                        <h3 style="text-align:center">Authorization Successful!! Please return to Glip!</h3>
                     </div>
                 </div>
             </div>

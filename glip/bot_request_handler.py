@@ -7,6 +7,7 @@ import traceback
 import boto3
 import os
 import re
+from boto3.dynamodb.conditions import Key
 
 dynamodb = boto3.resource('dynamodb')
 re_mention = r'!\[:Person\]\(([0-9]+)\)'
@@ -25,8 +26,7 @@ def get_total_members(group_id, bot_id):
     table = dynamodb.Table(os.environ['GROUP_LIST_DYNAMODB_TABLE'])
     response = table.get_item(
         Key={
-            'group_id': group_id,
-            'bot_id': bot_id
+            'group_id': group_id
         }
     )
     return response['Item']['total_members']
@@ -35,8 +35,7 @@ def update_group_id(group_id, total_members, bot_id):
     table = dynamodb.Table(os.environ['GROUP_LIST_DYNAMODB_TABLE'])
     response = table.update_item(
         Key = {
-            'group_id':group_id,
-            'bot_id': bot_id
+            'group_id':group_id
         },
         UpdateExpression="set total_members = :tm",
         ExpressionAttributeValues={
@@ -49,6 +48,7 @@ def update_group_id(group_id, total_members, bot_id):
 def delete_group_id_by_bot_id(bot_id):
     table = dynamodb.Table(os.environ['GROUP_LIST_DYNAMODB_TABLE'])
     response = table.query(
+        IndexName=os.environ['GROUP_LIST_ACCOUNT_RELATION'],
         KeyConditionExpression=Key('bot_id').eq(bot_id)
     )
     
@@ -63,8 +63,7 @@ def delete_group_id_by_group_id(group_id, bot_id):
     table = dynamodb.Table(os.environ['GROUP_LIST_DYNAMODB_TABLE'])
     table.delete_item(
         Key={
-            'group_id': group_id,
-            'bot_id': bot_id,
+            'group_id': group_id
         }
     )
 
