@@ -11,20 +11,20 @@ lex_client = boto3.client('lex-runtime')
 help_intent = 'Help'
 helper = RCClientHelper()
 
-def get_auth_url_msg(bot_id):
-    auth_url = helper.get_auth_url()
+def get_auth_url_msg(creator_id,bot_id,group_id):
+    #helper.save_bot_and_group_id(creator_id,bot_id,group_id)
+    auth_url = helper.get_auth_url(group_id,bot_id)
     message = '![:Person]('+bot_id+') **needs your authorization** before it can process your requests. **[Click here]('+auth_url+')** to authorize the bot.\n'
     return message
 
 def get_welcome_message(creator_id,bot_id,group_id):
     if helper.has_valid_token(creator_id):
         response = response_for_new_group(creator_id, bot_id)
-        #print('Welcome message '+response)
-        return response_for_new_group(creator_id, bot_id)
+        return response
     else:
-        helper.save_bot_and_group_id(creator_id, bot_id,group_id)
-        auth_url = helper.get_auth_url()
-        return response_for_new_group(creator_id, bot_id, auth_url, False)
+        #helper.save_bot_and_group_id(creator_id,bot_id,group_id)
+        auth_url = helper.get_auth_url(group_id,bot_id)
+        return response_for_new_group(creator_id, bot_id, auth_url, False) 
 
 
 def handler(creator_id,bot_id,group_id,message,new_group=False):

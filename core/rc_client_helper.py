@@ -17,46 +17,28 @@ class RCClientHelper:
         self.rcsdk = SDK(os.environ['HELPER_CLIENT_ID'],os.environ['HELPER_CLIENT_SECRET'],os.environ['RINGCENTRAL_ENV'])
         self.platform = self.rcsdk.platform()
 
-    #Return true if the access_token has been successfully added to dynamodb-table
-    def save_token(self):
-        #save account_id, access token, refresh_token and expire_time to table
-        #account_id is the key
+    def save_token(self,bot_id):
         try:
             data = self.platform.auth().data()
             print(data)
 
-            # data['expire_time'] = Decimal(data['expire_time'])
-            # data['refresh_token_expire_time'] = Decimal(data['refresh_token_expire_time'])
-            # data['expires_in'] = Decimal(data['expires_in'])
-            # data['refresh_token_expires_in'] = Decimal(data['refresh_token_expires_in'])
-
-            table = dynamodb.Table(os.environ['HELPER_DYNAMODB_TABLE'])
-            response = table.update_item(
-                Key = {'owner_id':data['owner_id']},
-                UpdateExpression = 'set access_token = :at, expire_time = :ex_t, expires_in = :ex_in, refresh_token = :rt, refresh_token_expire_time = :rt_ex_t, refresh_token_expire_in = :rt_ex_in, remember = :r, ex_scope = :s, token_type = :tt ',
-                ExpressionAttributeValues={
-                    ':at': data['access_token'],
-                    ':ex_t': Decimal(data['expire_time']),
-                    ':ex_in': Decimal(data['expires_in']),
-                    ':rt': data['refresh_token'],
-                    ':rt_ex_t': Decimal(data['refresh_token_expire_time']),
-                    ':rt_ex_in': Decimal(data['refresh_token_expires_in']),
-                    ':r': data['remember'],
-                    ':s': data['scope'],
-                    ':tt': data['token_type']
-                },
-                ReturnValues="ALL_NEW"
-            )
-            print('Print response:\n')
-            print(response)
-            #table.put_item(Item=data)
-            print('successfully added token to table!!')
-            ret_val = {
-                'bot_id': response['Attributes']['bot_id'],
-                'group_id': response['Attributes']['group_id'],
-                'owner_id': response['Attributes']['owner_id'],
+            data = {
+                'owner_id':data['owner_id'],
+                'bot_id':bot_id,
+                'access_token': data['access_token'],
+                'expire_time': Decimal(data['expire_time']),
+                'expires_in': Decimal(data['expires_in']),
+                'refresh_token': data['refresh_token'],
+                'refresh_token_expire_time': Decimal(data['refresh_token_expire_time']),
+                'refresh_token_expires_in': Decimal(data['refresh_token_expires_in']),
+                'remember': data['remember'],
+                'ex_scope': data['scope'],
+                'token_type': data['token_type']
             }
-            return ret_val
+            table = dynamodb.Table(os.environ['HELPER_DYNAMODB_TABLE'])
+            table.put_item(Item=data)
+            print('successfully added token to table!!')
+
         except Exception as error:
             print('failed to add token to table!!')
             logging.error(error)
@@ -77,18 +59,16 @@ class RCClientHelper:
             )
             
     
-    def save_bot_and_group_id(self, owner_id, bot_id, group_id):
-        data = {
-            'owner_id':owner_id,
-            'bot_id':bot_id,
-            'group_id':group_id
-        }
-        table = dynamodb.Table(os.environ['HELPER_DYNAMODB_TABLE'])
-        table.put_item(Item=data)
-        print('Account Id, Bot Id and Group Id have been added to the table.')
+    # def save_bot_and_group_id(self, owner_id, bot_id, group_id):
+    #     data = {
+    #         'owner_id':owner_id,
+    #         'bot_id':bot_id,
+    #     }
+    #     table = dynamodb.Table(os.environ['HELPER_DYNAMODB_TABLE'])
+    #     table.put_item(Item=data)
+    #     print('Account Id, Bot Id and Group Id have been added to the table.')
 
 
-    #return true on success and false on failure
     def add_token_to_platform(self,item):
         #add the retrived values to the platform
         self.platform.auth().set_data(item)
@@ -103,7 +83,7 @@ class RCClientHelper:
             logging.error(error)
             raise error
     
-    def get_auth_url(self):
+    def get_auth_url(self,group_id,bot_id):
         #get the url the user can use to authorize the helper app
         redirect_url = os.environ['REDIRECT_HOST']+'/helper/oauth'
         host = os.environ['RINGCENTRAL_ENV']
@@ -111,7 +91,7 @@ class RCClientHelper:
             'response_type': 'code',
             'redirect_uri': redirect_url,
             'client_id': os.environ['HELPER_CLIENT_ID'],
-            'state': '',
+            'state': group_id+','+bot_id,
             'brand_id': '',
             'display': '',
             'prompt': '',

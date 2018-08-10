@@ -11,11 +11,13 @@ def handler(event):
     if request_type == 'oauth':
         print(event['queryStringParameters'])
         code = event['queryStringParameters']['code']
+        bot_info_str = event['queryStringParameters']['state']
+        bot_info_list = bot_info_str.split(',')
+        group_id = bot_info_list[0]
+        bot_id = bot_info_list[1]
         try:
             rcclient_helper.auth_with_code(code)
-            #get groupID and botId from the table
-            #Save access token, refresh token etc to the existing table. 
-            bot_info = rcclient_helper.save_token()
+            rcclient_helper.save_token(bot_id)
             response_body = get_success_page()
             
             #Post success message to glip group and send response
@@ -24,7 +26,8 @@ def handler(event):
                 "headers": {"Content-Type": "text/html"},
                 "body": response_body
             }
-            rcclient_bot.post_message(bot_info['bot_id'], bot_info['group_id'], 'Authorization successful!!')
+            
+            rcclient_bot.post_message(bot_id, group_id, 'Your have successfully authorized ![:Person]('+bot_id+')!!')
             return response
         except Exception as error:
             logging.error(error)
@@ -35,12 +38,6 @@ def handler(event):
                 "body": response_body
             }
             return response
-        
-    response = {
-        "statusCode": 500,
-        "body": "Invalid request"
-    }
-    return response
 
 def get_error_page():
     ret_val = '''

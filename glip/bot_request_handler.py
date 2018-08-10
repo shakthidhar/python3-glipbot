@@ -137,6 +137,7 @@ def handler(event):
                 bot_id = notification['ownerId']
                 total_members = len(body['members'])
                 save_group_id(group_id,total_members, bot_id)
+                reply_message = ''
                 if total_members == 2:
                     
                     creator_id = ''
@@ -146,7 +147,10 @@ def handler(event):
                             break
                     
                     reply_message = lex_process_message(creator_id,bot_id,group_id,None,True)
-                    rcclient_bot.post_message(bot_id,group_id,reply_message)
+                else:
+                    reply_message = 'Sorry, ![:Person]('+ bot_id +') is not meant to be used in teams with more than two members(including the bot).'
+                
+                rcclient_bot.post_message(bot_id,group_id,reply_message)
             
             elif body['eventType'] == 'GroupChanged':
                 #update db with number of people in the table
@@ -193,7 +197,7 @@ def handler(event):
                             print('Bot was mentioned in a group'+ received_message)
             #if event.type = 'create' do nothing
             elif body['eventType'] == 'Create':
-                print('A new bot with account ID '+notification['ownerId']+' and extension ID '+ body['extensionId']+' has been created')
+                print('A new bot with extension ID '+ body['extensionId']+' has been created')
 
             elif body['eventType'] == 'Delete':
                 bot_id = notification['ownerId']
@@ -201,7 +205,7 @@ def handler(event):
                 rcclient_bot.delete_token(bot_id)
                 rcclient_helper.delete_token(bot_id)
                 delete_group_id_by_bot_id(bot_id)
-                print('The bot with account ID '+bot_id+ ' and extension ID '+extension_id+' has been removed')
+                print('The bot with extension ID '+extension_id+' has been removed')
 
             response = {
                 "statusCode": 200,
