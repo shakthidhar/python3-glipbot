@@ -117,7 +117,7 @@ class RCClientHelper:
             logging.error(error)
             return None
 
-    def has_valid_token(self,owner_id):
+    def has_valid_token(self,owner_id,bot_id):
         item = self.get_token_from_db(owner_id) 
         if item == None:
             return False
@@ -130,7 +130,7 @@ class RCClientHelper:
             elif self.platform.auth().refresh_token_valid():
                 print('Has valid refresh token')
                 self.platform.refresh()
-                self.save_token()
+                self.save_token(bot_id)
                 return True
             else:
                 print('Has invalid access and refresh token')

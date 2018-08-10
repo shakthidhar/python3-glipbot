@@ -18,7 +18,7 @@ def get_auth_url_msg(creator_id,bot_id,group_id):
     return message
 
 def get_welcome_message(creator_id,bot_id,group_id):
-    if helper.has_valid_token(creator_id):
+    if helper.has_valid_token(creator_id,bot_id):
         response = response_for_new_group(creator_id, bot_id)
         return response
     else:
@@ -65,7 +65,7 @@ def handler(creator_id,bot_id,group_id,message,new_group=False):
                 reply_message = lex_response['message']
                 reply_message = reply_message.replace('\\n','\n')
                 return reply_message
-            elif helper.has_valid_token(creator_id):
+            elif helper.has_valid_token(creator_id,bot_id):
                 if lex_response['intentName'] == 'CompanyInfo' and lex_response['dialogState'] == 'ReadyForFulfillment':
                     company_details = helper.get('/account/~',None)
                     return rsp_for_get_company_info(company_details)
