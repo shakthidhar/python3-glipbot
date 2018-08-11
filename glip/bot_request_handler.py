@@ -176,8 +176,9 @@ def handler(event):
                 if received_message == '':
                     #Group has been deleted.
                     #Delete group from db
-                    group_id = body['groupId']
-                    delete_group_id_by_group_id(group_id,bot_id)
+                    #group_id = body['groupId']
+                    #delete_group_id_by_group_id(group_id,bot_id)
+                    pass
                 else:
                     total_members = get_total_members(group_id, bot_id)
                     #Check the text with existing intents and post 
@@ -187,13 +188,15 @@ def handler(event):
                         print('Received message from user')
                         #reply_message = process_commands(creator_id,bot_id,group_id,received_message)
                         reply_message = lex_process_message(creator_id,bot_id,group_id,received_message)
-                        rcclient_bot.post_message(bot_id,group_id,reply_message)
-                        #rcclient_bot.post_message_card(group_id,reply_message)
+                        if type(reply_message) is str: 
+                            rcclient_bot.post_message(bot_id,group_id,text_message=reply_message)
+                        elif type(reply_message) is dict:
+                            rcclient_bot.post_message(bot_id,group_id,card_message=reply_message)
                     elif creator_id != bot_id and total_members > 2:
                         matches = re.findall(re_mention, received_message)
                         if str(bot_id) in matches:
                             reply_message = 'Sorry, ![:Person]('+ bot_id +') is not meant to be used in teams with more than two members(including the bot).'
-                            rcclient_bot.post_message(bot_id,group_id,reply_message)
+                            rcclient_bot.post_message(bot_id,group_id,text_message=reply_message)
                             print('Bot was mentioned in a group'+ received_message)
             #if event.type = 'create' do nothing
             elif body['eventType'] == 'Create':

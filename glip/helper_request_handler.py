@@ -26,8 +26,8 @@ def handler(event):
                 "headers": {"Content-Type": "text/html"},
                 "body": response_body
             }
-            
-            rcclient_bot.post_message(bot_id, group_id, 'Your have successfully authorized ![:Person]('+bot_id+')!!')
+
+            rcclient_bot.post_message(bot_id, group_id, text_message='Your have successfully authorized ![:Person]('+bot_id+')!!')
             return response
         except Exception as error:
             logging.error(error)

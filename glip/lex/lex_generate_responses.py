@@ -175,6 +175,31 @@ def rsp_for_user_services(extension_details, query):
             if not feature_list[i]['enabled']:
                 ret_val = ret_val + '|'+feature_list[i]['featureName']+'|'+feature_list[i]['reason']+'|\n'
         return ret_val
+def rsp_card_for_caller_id(caller_id_details):
+    fields = [{"title": "Feature","style": "Short","value":""},{"title": "Caller ID","style": "Short","value":""}]
+    caller_id_by_feature = caller_id_details['byFeature']
+    for i in range(len(caller_id_by_feature)):
+        feature = caller_id_by_feature[i]['feature']
+        callerId = caller_id_by_feature[i]['callerId']
+        if bool(callerId):
+            fields.append({"title": " ","value": feature,"style": "Short"})
+            #fields.append({"title": " ","value": callerId['type'],"style": "Short"})
+            if callerId['type'] == "PhoneNumber":
+                fields.append({"title": " ","value": callerId['phoneInfo']['phoneNumber'],"style": "Short"})
+            else:
+                fields.append({"title": " ","value":" ","style": "Short"})
+    
+    ret_val = {
+        "text": "",
+        "attachments": [{
+            "type": "Card",
+            "fallback": "The attachment isn't supported.",
+            "color": "#9C1A22",
+            "fields": fields,
+        }
+        ]
+    }
+    return ret_val
 
 def rsp_for_caller_id(caller_id_details):
     caller_id_by_feature = caller_id_details['byFeature']

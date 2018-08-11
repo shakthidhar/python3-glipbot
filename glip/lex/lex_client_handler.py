@@ -105,7 +105,8 @@ def handler(creator_id,bot_id,group_id,message,new_group=False):
                     return reply_message
                 elif lex_response['intentName'] == 'CallerID' and lex_response['dialogState'] == 'ReadyForFulfillment':
                     caller_id_details = helper.get('/restapi/v1.0/account/~/extension/~/caller-id', None)
-                    reply_message = rsp_for_caller_id(caller_id_details)
+                    #reply_message = rsp_for_caller_id(caller_id_details)
+                    reply_message = rsp_card_for_caller_id(caller_id_details)
                     return reply_message
                 elif lex_response['intentName'] == 'EditPersonalInfo' and lex_response['dialogState'] == 'ReadyForFulfillment':
                     reply_message = rsp_for_edit_personal_info()

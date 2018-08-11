@@ -135,19 +135,22 @@ class RCClientBot:
             }
             return response
 
-    def post_message(self,bot_id,group_id,message):
-        if self.add_token_to_platform(bot_id):
-            messageData = {
-                "text":message
-            }
-            data = self.platform.auth().data()
-            header = {
-                'Authorization': 'bearer ' + data['access_token']
-            }
-            print('posted message '+message)
-            self.platform.post('/restapi/v1.0/glip/groups/'+group_id+'/posts',body=messageData, headers=header, skip_auth_check=True)
-        else:
-            print("failed to add token to platform")
+    def post_message(self,bot_id,group_id,text_message=None,card_message=None):
+        if text_message is not None:
+            if self.add_token_to_platform(bot_id):
+                messageData = {
+                    "text":text_message
+                }
+                data = self.platform.auth().data()
+                header = {
+                    'Authorization': 'bearer ' + data['access_token']
+                }
+                print('posted message '+text_message)
+                self.platform.post('/restapi/v1.0/glip/groups/'+group_id+'/posts',body=messageData, headers=header, skip_auth_check=True)
+            else:
+                print("failed to add token to platform")
+        elif card_message is not None:
+            self.post_message_card(bot_id,group_id,card_message)
 
 
     def post_message_card(self,bot_id,group_id,message):
