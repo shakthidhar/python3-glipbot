@@ -1,3 +1,4 @@
+#The functions in this file are no longer used. All generate responses request are sent to lex_generate_responses 
 import re
 
 command_groups = '* **help: company info** - to list commands for viewing Company Information\n'

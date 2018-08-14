@@ -1,3 +1,4 @@
+#This File is no longer used. All request to process commands are sent to lex_client_handler.py
 from core.rc_client_helper import RCClientHelper
 import logging
 import re
