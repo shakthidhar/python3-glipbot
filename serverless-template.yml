@@ -24,7 +24,9 @@ provider:
     HELPER_CLIENT_SECRET: replace-with-helper-client-secret
     BOT_DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-botTable
     HELPER_DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-helperTable
-    HELPER_BOT_ACCOUNT_RELATION: ${self:provider.environment.HELPER_DYNAMODB_TABLE}
+    HELPER_BOT_ACCOUNT_RELATION: ${self:provider.environment.HELPER_DYNAMODB_TABLE}-bot-id-relation
+    GROUP_LIST_DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-groupListTable
+    GROUP_LIST_ACCOUNT_RELATION: ${self:service}-${opt:stage, self:provider.stage}-bot-id-relation
     LEX_BOT_NAME: GlipBot
 
 
@@ -47,6 +49,15 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.GROUP_LIST_DYNAMODB_TABLE}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.HELPER_DYNAMODB_TABLE}"
     - Effect: Allow
       Action:
@@ -57,6 +68,15 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.HELPER_DYNAMODB_TABLE}/index/${self:provider.environment.HELPER_BOT_ACCOUNT_RELATION}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.GROUP_LIST_DYNAMODB_TABLE}/index/${self:provider.environment.GROUP_LIST_ACCOUNT_RELATION}"
     - Effect: Allow
       Action:
         - lex:PostText
@@ -93,6 +113,35 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: ${self:provider.environment.BOT_DYNAMODB_TABLE}
+    
+    GroupListDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: group_id
+            AttributeType: S
+          - AttributeName: bot_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: group_id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.GROUP_LIST_ACCOUNT_RELATION}
+            KeySchema:
+              - AttributeName: bot_id
+                KeyType: HASH
+            Projection:
+              NonKeyAttributes:
+                - bot_id
+              ProjectionType: INCLUDE
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.GROUP_LIST_DYNAMODB_TABLE}
     
     HelperDynamoDbTable:
       Type: 'AWS::DynamoDB::Table'
