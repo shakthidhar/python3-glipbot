@@ -38,7 +38,7 @@ environment:
 ```
 
 ### Import Amazon Lex Bot ###
-needs to be updated
+Log in to your amazon aws account. Search for Amazon Lex in services and navigate to the Amazon Lex dashboard. Select the Action dropdown and click on import. Impot the GlipBot zip file.
 
 ### Install Serverless ###
 Install serverless globally on you computer by using the command:
