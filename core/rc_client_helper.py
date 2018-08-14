@@ -48,7 +48,7 @@ class RCClientHelper:
     def delete_token(self,bot_id):
         table = dynamodb.Table(os.environ['HELPER_DYNAMODB_TABLE'])
         response = table.query(
-            IndexName=os.environ['HELPER_DYNAMODB_TABLE'],
+            IndexName=os.environ['HELPER_BOT_ACCOUNT_RELATION'],
             KeyConditionExpression=Key('bot_id').eq(bot_id)
         )
         for item in response['Items']:
