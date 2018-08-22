@@ -164,7 +164,7 @@ def handler(creator_id,bot_id,group_id,message,new_group=False):
                     return reply_message                       
 
             else:
-                reply_message = get_auth_url_msg(bot_id)
+                reply_message = get_auth_url_msg(creator_id,bot_id,group_id)
                 return reply_message
 
         except Exception as error:
